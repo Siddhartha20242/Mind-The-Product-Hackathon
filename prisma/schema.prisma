@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client.js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql" 
+  url = env("DATABASE_URL")
+}
+
+model User{
+
+
+  // User Preferences
+  id        String    @id@default(cuid())
+  slackId   String    @unique
+  email     String    @unique
+
+
+
+  //API Tokens
+  slackToken String?
+  gmailToken String?
+  calendarToken String?
+  youtubeToken String?
+  githubToken String?
+  twilioToken String?
+
+
+  // BehaviorTokens
+  toneStyle String @default("professional")
+  autoReplyEmail Boolean @default(true)
+  autoReplySlack Boolean @default(false)
+  attendMeetings Boolean @default(true)
+  answerCalls Boolean @default(true)
+
+
+
+  //Statistics
+  meetingsAttended Int @default(0)
+  emailsReplied Int @default(0)
+  SlackReplied Int @default(0)
+  youtubeSummarized Int @default(0)
+  callsAnswered Int @default(0)
+  hoursSaved Float @default(0)
+
+
+  // TimeStamps
+  CreatedAt DateTime @default(now())
+  UpdatedAt DateTime @UpdatedAt
+
+
+
+
+
+
+}
