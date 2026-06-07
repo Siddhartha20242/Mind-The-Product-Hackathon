@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SecondMe</title>
+  <script>
+  (function(apiKey){
+      (function(p,e,n,d,o){var v,w,x,y,z;o=p[d]=p[d]||{};o._q=o._q||[];
+      v=['initialize','identify','updateOptions','pageLoad','track', 'trackAgent'];for(w=0,x=v.length;w<x;++w)(function(m){
+      o[m]=o[m]||function(){o._q[m===v[0]?'unshift':'push']([m].concat([].slice.call(arguments,0)));};})(v[w]);
+      y=e.createElement(n);y.async=!0;y.src='https://cdn.pendo.io/agent/static/'+apiKey+'/pendo.js';
+      z=e.getElementsByTagName(n)[0];z.parentNode.insertBefore(y,z);})(window,document,'script','pendo');
+  })('9ea1f2ed-842c-4ee3-819c-27379c081c0c');
+  </script>
+  <script>
+  // Initialize Pendo with anonymous visitor on app entry (exactly once)
+  pendo.initialize({
+    visitor: {
+      id: ''
+    }
+  });
+
+  // Called after successful Slack OAuth sign-in when user data is available
+  function onSignIn(user) {
+    pendo.identify({
+      visitor: {
+        id:                 user.id,
+        email:              user.email,
+        slackId:            user.slackId,
+        toneStyle:          user.toneStyle,
+        autoReplyEmail:     user.autoReplyEmail,
+        autoReplySlack:     user.autoReplySlack,
+        attendMeetings:     user.attendMeetings,
+        answerCalls:        user.answerCalls,
+        meetingsAttended:   user.meetingsAttended,
+        emailsReplied:      user.emailsReplied,
+        slackReplied:       user.slackReplied,
+        youtubeSummarized:  user.youtubeSummarized,
+        callsAnswered:      user.callsAnswered,
+        hoursSaved:         user.hoursSaved,
+        createdAt:          user.createdAt,
+        updatedAt:          user.updatedAt
+      }
+    });
+  }
+
+  // Called on sign-out to reset Pendo session
+  function onSignOut() {
+    pendo.clearSession();
+  }
+  </script>
+</head>
+<body>
+</body>
+</html>
