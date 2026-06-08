@@ -54,9 +54,125 @@ model User{
   CreatedAt DateTime @default(now())
   UpdatedAt DateTime @UpdatedAt
 
+  }
 
+  
 
+  model Briefing {
+    id String @id @default(cuid())
+    userId String
+    date DateTime @default(now())
+    content String @db.Text
+    sent Boolean @default(false)
+    sentAt DateTime ?
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+    @@unique([userId, date])
+    @@index ([userId, date])
+  }
 
-
+  model Meeting {
+  id          String   @id @default(cuid())
+  userId      String
+  meetingUrl  String
+  title       String
+  startTime   DateTime
+  endTime     DateTime
+  summary     String?  @db.Text
+  decisions   String?  @db.Text
+  actions     String?  @db.Text
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, startTime])
 }
+
+
+model YouTubeVideo {
+  id            String   @id @default(cuid())
+  userId        String
+  videoId       String   @unique
+  title         String
+  channelName   String
+  summary       String?  @db.Text
+  worthWatching Boolean  @default(false)
+  
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+}
+
+
+
+model Email {
+  id           String   @id @default(cuid())
+  userId       String
+  messageId    String   @unique
+  from         String
+  subject      String
+  importance   String   @default("medium")
+  autoReplied  Boolean  @default(false)
+  replyText    String?  @db.Text
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+}
+
+
+
+model SlackMessage {
+  id           String   @id @default(cuid())
+  userId       String
+  channelId    String
+  messageTs    String
+  fromUserId   String
+  fromUsername String
+  text         String   @db.Text
+  importance   String   @default("medium")
+  autoReplied  Boolean  @default(false)
+  replyText    String?  @db.Text
+  
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([channelId, messageTs])
+  @@index([userId])
+}
+
+
+
+model Call {
+  id           String   @id @default(cuid())
+  userId       String
+  fromNumber   String
+  callerName   String?
+  transcript   String?  @db.Text
+  summary      String?  @db.Text
+  urgency      String   @default("medium")
+  callbackInitiated Boolean @default(false)
+  handled      Boolean  @default(false)
+  duration     Int?
+  recordingUrl String?
+  createdAt    DateTime @default(now())
+  
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, createdAt])
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
