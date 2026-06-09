@@ -1,178 +1,54 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client.js"
+  provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql" 
-  url = env("DATABASE_URL")
+  provider = "postgresql"
 }
 
-model User{
-
-
-  // User Preferences
-  id        String    @id@default(cuid())
-  slackId   String    @unique
-  email     String    @unique
-
-
-
-  //API Tokens
-  slackToken String?
-  gmailToken String?
-  calendarToken String?
-  youtubeToken String?
-  githubToken String?
-  twilioToken String?
-
-
-  // BehaviorTokens
-  toneStyle String @default("professional")
-  autoReplyEmail Boolean @default(true)
-  autoReplySlack Boolean @default(false)
-  attendMeetings Boolean @default(true)
-  answerCalls Boolean @default(true)
-
-
-
-  //Statistics
-  meetingsAttended Int @default(0)
-  emailsReplied Int @default(0)
-  SlackReplied Int @default(0)
-  youtubeSummarized Int @default(0)
-  callsAnswered Int @default(0)
-  hoursSaved Float @default(0)
-
-
-  // TimeStamps
-  CreatedAt DateTime @default(now())
-  UpdatedAt DateTime @UpdatedAt
-
-  }
-
-  
-
-  model Briefing {
-    id String @id @default(cuid())
-    userId String
-    date DateTime @default(now())
-    content String @db.Text
-    sent Boolean @default(false)
-    sentAt DateTime ?
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-    @@unique([userId, date])
-    @@index ([userId, date])
-  }
-
-  model Meeting {
-  id          String   @id @default(cuid())
-  userId      String
-  meetingUrl  String
-  title       String
-  startTime   DateTime
-  endTime     DateTime
-  summary     String?  @db.Text
-  decisions   String?  @db.Text
-  actions     String?  @db.Text
-  
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@index([userId, startTime])
+model User {
+  id                String     @id @default(cuid())
+  slackId           String     @unique
+  email             String     @unique
+  slackToken        String?
+  gmailToken        String?
+  calendarToken     String?
+  youtubeToken      String?
+  githubToken       String?
+  twilioToken       String?
+  toneStyle         String     @default("professional")
+  autoReplyEmail    Boolean    @default(true)
+  autoReplySlack    Boolean    @default(false)
+  attendMeetings    Boolean    @default(true)
+  answerCalls       Boolean    @default(true)
+  meetingsAttended  Int        @default(0)
+  emailsReplied     Int        @default(0)
+  slackReplied      Int        @default(0)
+  youtubeSummarized Int        @default(0)
+  callsAnswered     Int        @default(0)
+  hoursSaved        Float      @default(0)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  briefings         Briefing[]
+  meetings          Meeting[]
 }
 
-
-model YouTubeVideo {
-  id            String   @id @default(cuid())
-  userId        String
-  videoId       String   @unique
-  title         String
-  channelName   String
-  summary       String?  @db.Text
-  worthWatching Boolean  @default(false)
-  
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@index([userId])
+model Briefing {
+  id        String   @id @default(cuid())
+  userId    String
+  content   String
+  date      DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 }
 
-
-
-model Email {
-  id           String   @id @default(cuid())
-  userId       String
-  messageId    String   @unique
-  from         String
-  subject      String
-  importance   String   @default("medium")
-  autoReplied  Boolean  @default(false)
-  replyText    String?  @db.Text
-  
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@index([userId])
+model Meeting {
+  id         String   @id @default(cuid())
+  userId     String
+  meetingUrl String
+  title      String
+  startTime  DateTime
+  endTime    DateTime
+  attended   Boolean  @default(false)
+  user       User     @relation(fields: [userId], references: [id])
 }
-
-
-
-model SlackMessage {
-  id           String   @id @default(cuid())
-  userId       String
-  channelId    String
-  messageTs    String
-  fromUserId   String
-  fromUsername String
-  text         String   @db.Text
-  importance   String   @default("medium")
-  autoReplied  Boolean  @default(false)
-  replyText    String?  @db.Text
-  
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@unique([channelId, messageTs])
-  @@index([userId])
-}
-
-
-
-model Call {
-  id           String   @id @default(cuid())
-  userId       String
-  fromNumber   String
-  callerName   String?
-  transcript   String?  @db.Text
-  summary      String?  @db.Text
-  urgency      String   @default("medium")
-  callbackInitiated Boolean @default(false)
-  handled      Boolean  @default(false)
-  duration     Int?
-  recordingUrl String?
-  createdAt    DateTime @default(now())
-  
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@index([userId, createdAt])
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
