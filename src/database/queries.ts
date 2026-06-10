@@ -1,4 +1,5 @@
 import prisma from './client.js'
+import { pendoTrack } from '../pendo/trackEvent'
 
 export async function getUserBySlackId(slackId: string) {
   return prisma.user.findUnique({
@@ -23,13 +24,21 @@ export async function createUser(data: {
   email: string
   slackToken?: string
 }) {
-  return prisma.user.create({
+  const user = await prisma.user.create({
     data: {
       slackId: data.slackId,
       email: data.email,
       slackToken: data.slackToken
     }
   })
+
+  pendoTrack('user_created', user.id, 'system', {
+    slackId: data.slackId,
+    email: data.email,
+    hasSlackToken: !!data.slackToken
+  })
+
+  return user
 }
 
 export async function getAllUsers() {
@@ -47,10 +56,23 @@ export async function updateUserTokens(
     twilioToken?: string
   }
 ) {
-  return prisma.user.update({
+  const result = await prisma.user.update({
     where: { id: userId },
     data: tokens
   })
+
+  const tokensUpdated = Object.keys(tokens).filter(k => tokens[k as keyof typeof tokens] !== undefined)
+  pendoTrack('user_tokens_updated', userId, 'system', {
+    tokensUpdated: tokensUpdated.join(','),
+    connectedServicesCount: tokensUpdated.length,
+    hasGmailToken: tokens.gmailToken !== undefined,
+    hasCalendarToken: tokens.calendarToken !== undefined,
+    hasYoutubeToken: tokens.youtubeToken !== undefined,
+    hasGithubToken: tokens.githubToken !== undefined,
+    hasTwilioToken: tokens.twilioToken !== undefined
+  })
+
+  return result
 }
 
 export async function incrementUserStats(
@@ -67,7 +89,7 @@ export async function incrementUserStats(
   const user = await prisma.user.findUnique({ where: { id: userId } })
   if (!user) throw new Error('User not found')
 
-  return prisma.user.update({
+  const result = await prisma.user.update({
     where: { id: userId },
     data: {
       meetingsAttended: (user.meetingsAttended || 0) + (stats.meetingsAttended || 0),
@@ -78,16 +100,34 @@ export async function incrementUserStats(
       hoursSaved: (user.hoursSaved || 0) + (stats.hoursSaved || 0)
     }
   })
+
+  pendoTrack('user_stats_incremented', userId, 'system', {
+    meetingsAttended: stats.meetingsAttended || 0,
+    emailsReplied: stats.emailsReplied || 0,
+    slackReplied: stats.slackReplied || 0,
+    youtubeSummarized: stats.youtubeSummarized || 0,
+    callsAnswered: stats.callsAnswered || 0,
+    hoursSaved: stats.hoursSaved || 0
+  })
+
+  return result
 }
 
 export async function createBriefing(userId: string, content: string) {
-  return prisma.briefing.create({
+  const briefing = await prisma.briefing.create({
     data: {
       userId,
       content,
       date: new Date()
     }
   })
+
+  pendoTrack('daily_briefing_generated', userId, 'system', {
+    briefingContentLength: content.length,
+    briefingDate: new Date().toISOString()
+  })
+
+  return briefing
 }
 
 export async function getTodayBriefing(userId: string) {
@@ -115,9 +155,22 @@ export async function createMeeting(data: {
   startTime: Date
   endTime: Date
 }) {
-  return prisma.meeting.create({
+  const meeting = await prisma.meeting.create({
     data
   })
+
+  const durationMinutes = Math.round(
+    (data.endTime.getTime() - data.startTime.getTime()) / 60000
+  )
+  pendoTrack('meeting_created', data.userId, 'system', {
+    meetingTitle: data.title,
+    meetingUrl: data.meetingUrl,
+    startTime: data.startTime.toISOString(),
+    endTime: data.endTime.toISOString(),
+    meetingDurationMinutes: durationMinutes
+  })
+
+  return meeting
 }
 
 export async function getUpcomingMeetings(userId: string, hoursAhead: number = 2) {

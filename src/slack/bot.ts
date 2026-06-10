@@ -1,5 +1,6 @@
 import { App } from '@slack/bolt';
 import dotenv from 'dotenv';
+import { pendoTrack } from '../pendo/trackEvent';
 
 dotenv.config();
 
@@ -13,9 +14,15 @@ const app = new App({
 // Command handler for /secondme
 app.command('/secondme', async ({ command, ack, respond }) => {
   await ack();
-  
+
   const action = command.text.trim().toLowerCase();
-  
+
+  pendoTrack('slack_command_executed', command.user_id, 'system', {
+    slackUserId: command.user_id,
+    commandAction: action || 'help',
+    channelId: command.channel_id
+  })
+
   if (action === 'help' || action === '') {
     await respond({
       text: '*Second Me Commands:*\n' +
