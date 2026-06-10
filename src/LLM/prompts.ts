@@ -144,24 +144,24 @@ Create a concise briefing that:
 Keep under 600 words.
 
 Output format:
-DAILY BRIEFING
+📅 DAILY BRIEFING
 
- URGENT:
+🔥 URGENT:
 - ...
 
- EMAILS:
+📧 EMAILS:
 - ...
 
- YOUTUBE:
+📹 YOUTUBE:
 - ...
 
- SLACK:
+💬 SLACK:
 - ...
 
 📞 CALLS:
 - ...
 
- ACTIONS NEEDED:
+✅ ACTIONS NEEDED:
 - ...
 `;
 
