@@ -32,17 +32,14 @@ export async function callGroq(
   temperature: number = DEFAULT_TEMPERATURE,
   maxTokens: number = DEFAULT_MAX_TOKENS
 ): Promise<string> {
-  
-  // Convert string prompt to proper message format
-  // If user just sends "Hello", convert to [{ role: "user", content: "Hello" }]
+
   const formattedMessages = typeof messages === 'string'
     ? [{ role: 'user' as const, content: messages }]
     : messages;
 
   let lastError: Error | null = null;
   
-  // Step 129: Add error handling with retry logic (max 3 retries)
-  // This tries the API call up to 3 times before giving up
+
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
       console.log(`🔄 Groq API call attempt ${attempt}...`);
@@ -57,23 +54,22 @@ export async function callGroq(
 
       // Extract the text response from the API response
       const content = response.choices[0]?.message?.content || '';
-      console.log(`✅ Groq API call successful!`);
+      console.log(` Groq API call successful!`);
       return content;  // Step 128: Return the response content
       
     } catch (error) {
       lastError = error as Error;
-      console.error(`❌ Groq API attempt ${attempt} failed:`, error.message);
+      console.error(` Groq API attempt ${attempt} failed:`, error.message);
       
       // If not the last attempt, wait before retrying
       if (attempt < 3) {
         const waitTime = attempt * 1000;  // 1 second, then 2 seconds
-        console.log(`⏳ Waiting ${waitTime}ms before retry...`);
+        console.log(` Waiting ${waitTime}ms before retry...`);
         await new Promise(resolve => setTimeout(resolve, waitTime));
       }
     }
   }
   
-  // If all 3 attempts fail, throw an error
   throw new Error(`Groq API failed after 3 attempts: ${lastError?.message}`);
 }
 
@@ -83,17 +79,17 @@ export async function callGroq(
  */
 export async function testGroq(): Promise<boolean> {
   try {
-    console.log('🧪 Testing Groq connection...');
-    console.log('📤 Sending prompt: "Hello, are you working?"');
+    console.log(' Testing Groq connection...');
+    console.log(' Sending prompt: "Hello, are you working?"');
     
     // Call the AI with a simple test prompt
     const response = await callGroq('Hello, are you working?');
     
-    console.log('📝 Groq response:', response);
-    console.log('✅ Groq is working!');
+    console.log(' Groq response:', response);
+    console.log(' Groq is working!');
     return true;
   } catch (error) {
-    console.error('❌ Groq test failed:', error);
+    console.error('Groq test failed:', error);
     return false;
   }
 }
